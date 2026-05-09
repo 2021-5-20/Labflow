@@ -1,0 +1,38 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: labflow-api
+  servlet:
+    multipart:
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:50MB}
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:50MB}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/labflow}
+    username: ${SPRING_DATASOURCE_USERNAME:labflow}
+    password: ${SPRING_DATASOURCE_PASSWORD:labflow}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+labflow:
+  ai-service:
+    base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
+    mock-enabled: ${AI_SERVICE_MOCK_ENABLED:false}
+  minio:
+    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:labflow}
+    secret-key: ${MINIO_SECRET_KEY:labflow-secret}
+    bucket: ${MINIO_BUCKET:labflow}
