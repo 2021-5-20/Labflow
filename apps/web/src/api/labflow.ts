@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { apiBaseUrl, apiClient } from './client'
-import type { AiJob, DashboardSummary, Experiment, ExperimentStatus, Paper, PaperRecognition, Project, StoredFile, WeeklyReport, WeeklyReportDraft } from '../types'
+import type { AiJob, DashboardSummary, Experiment, ExperimentStatus, Paper, PaperRecognition, Project, RagAskResult, RagChunk, RagIndexResult, RagSearchResult, StoredFile, WeeklyReport, WeeklyReportDraft } from '../types'
 
 export interface ProjectPayload {
   name: string
@@ -197,5 +197,25 @@ export async function previewWeeklyReport(projectId: string, payload: { startDat
 
 export async function generateWeeklyReport(projectId: string, payload: { startDate: string; endDate: string; contentMarkdown?: string }) {
   const { data } = await apiClient.post<WeeklyReport>(`/api/projects/${projectId}/reports/weekly`, payload)
+  return data
+}
+
+export async function indexProjectRag(projectId: string) {
+  const { data } = await apiClient.post<RagIndexResult>(`/api/projects/${projectId}/rag/index`, undefined, { timeout: 120000 })
+  return data
+}
+
+export async function listRagChunks(projectId: string) {
+  const { data } = await apiClient.get<RagChunk[]>(`/api/projects/${projectId}/rag/chunks`)
+  return data
+}
+
+export async function searchRag(projectId: string, question: string) {
+  const { data } = await apiClient.post<RagSearchResult>(`/api/projects/${projectId}/rag/search`, { question }, { timeout: 30000 })
+  return data
+}
+
+export async function askRag(projectId: string, question: string) {
+  const { data } = await apiClient.post<RagAskResult>(`/api/projects/${projectId}/rag/ask`, { question }, { timeout: 120000 })
   return data
 }

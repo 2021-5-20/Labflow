@@ -47,6 +47,11 @@
         <strong>周报</strong>
         <p>自动填写草稿，支持 AI 优化后确认保存。</p>
       </button>
+      <button class="launch-card rag" type="button" @click="router.push(`/projects/${projectId}/rag`)">
+        <span><el-icon><Connection /></el-icon></span>
+        <strong>RAG 问答</strong>
+        <p>把论文、PDF、AI 卡片和实验记录变成项目内知识库。</p>
+      </button>
     </section>
 
     <div class="workspace-grid">
@@ -90,7 +95,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Back, DataAnalysis, Document, Files, Notebook, TrendCharts, VideoPlay } from '@element-plus/icons-vue'
+import { Back, Connection, DataAnalysis, Document, Files, Notebook, TrendCharts, VideoPlay } from '@element-plus/icons-vue'
 import { listExperiments, listPapers, listReports } from '../api/labflow'
 import EmptyState from '../components/EmptyState.vue'
 import StatusBadge from '../components/StatusBadge.vue'
@@ -312,7 +317,7 @@ onMounted(load)
 }
 
 .workspace-launchpad {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .launch-card {
@@ -354,6 +359,11 @@ onMounted(load)
 .launch-card.reports span {
   background: #f0e7ff;
   color: #7c3cff;
+}
+
+.launch-card.rag span {
+  background: #dff7f4;
+  color: #0f766e;
 }
 
 .launch-card strong {

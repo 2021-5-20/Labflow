@@ -43,6 +43,7 @@ LabFlow 当前聚焦一个最小但完整的闭环：
 - 实验记录：支持状态、GitHub 仓库 URL、commit/branch/tag 说明、数据集、配置、指标、结论、失败原因和下一步。
 - 周报生成：支持自动填写草稿、Markdown 编辑、AI 优化草稿、确认后保存历史记录。
 - AI 论文卡片：支持摘要、主要贡献、局限性、缓存、任务状态和异步执行。
+- 项目内 RAG：支持把论文、PDF 文本、AI 论文卡片和实验记录索引成知识片段，并进行研究问答。
 - AI 服务：FastAPI 服务支持 mock 模式，也支持 OpenAI-compatible API。
 - 数据库：仅支持 PostgreSQL，使用 Flyway 管理迁移，并预留 pgvector migration。
 - 本地部署：提供 Docker Compose，一次启动 PostgreSQL、MinIO、后端、前端和 AI service。
@@ -89,6 +90,7 @@ flowchart LR
   API --> PG["PostgreSQL + Flyway"]
   API --> MinIO["MinIO PDF 存储"]
   API --> AI["FastAPI AI 服务"]
+  API --> RAG["rag_chunks + local embeddings"]
   AI --> LLM["OpenAI-compatible LLM API"]
 ```
 
@@ -97,6 +99,7 @@ flowchart LR
 - MinIO 保存上传的 PDF 对象，`stored_files` 表保存 object key 和文件元数据。
 - AI job 会落库，并由后端异步执行，前端通过轮询查看状态。
 - AI service 可以使用 mock 响应，也可以调用 Kimi、OpenAI 或其他兼容 OpenAI API 的模型服务。
+- RAG v0.3 先使用段落优先 chunking 和后端本地确定性 embedding，保证不配置 embedding API 也能跑；schema 已预留 pgvector 列，后续可以替换成真实向量模型。
 
 ## 本地开发
 
@@ -239,6 +242,7 @@ Compose 默认使用 `pgvector/pgvector:pg16`，因此 `CREATE EXTENSION IF NOT 
 | 实验 | `GET/POST /api/projects/{projectId}/experiments`, `GET/PUT/DELETE /api/experiments/{experimentId}` |
 | 周报 | `POST /api/projects/{projectId}/reports/weekly/preview`, `POST /api/projects/{projectId}/reports/weekly`, `GET /api/projects/{projectId}/reports` |
 | AI jobs | `POST /api/ai/jobs`, `GET /api/ai/jobs/{jobId}`, `GET /api/ai/jobs/latest`, `GET /api/ai/jobs/latest-any` |
+| RAG | `POST /api/projects/{projectId}/rag/index`, `GET /api/projects/{projectId}/rag/chunks`, `POST /api/projects/{projectId}/rag/search`, `POST /api/projects/{projectId}/rag/ask` |
 
 ## 验证命令
 
@@ -293,6 +297,9 @@ LabFlow 当前只支持 PostgreSQL，不支持 MySQL。
 
 ### v0.3
 
+- 项目内 RAG 知识库。
+- 论文、PDF 文本、AI 论文卡片和实验记录索引。
+- RAG 研究问答页。
 - 带引用依据的论文摘要。
 - PDF 章节解析。
 - LangChain / LangGraph 工作流。
@@ -300,8 +307,8 @@ LabFlow 当前只支持 PostgreSQL，不支持 MySQL。
 
 ### v0.4
 
-- 基于 pgvector 的 RAG。
-- 论文 chunk embedding。
+- 生产级 embedding provider。
+- 基于 pgvector 的近邻检索。
 - Hybrid retrieval。
 - 实验结果和论文 claim 的关联。
 

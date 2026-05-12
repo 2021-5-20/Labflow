@@ -21,14 +21,17 @@
 
 ## v0.3
 
+- Project-scoped RAG indexing
+- RAG question answering over papers, PDF text, AI paper cards, and experiments
+- Local deterministic embedding fallback with pgvector-ready schema
 - Deeper PDF parsing
 - Citation-grounded summary
 - LangChain/LangGraph workflows
 
 ## v0.4
 
-- pgvector-based RAG
-- Paper chunk embedding
+- Production embedding provider integration
+- pgvector nearest-neighbor retrieval
 - Hybrid retrieval
 - Experiment-to-paper-claim linking
 

@@ -67,7 +67,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { DataAnalysis, Document, Expand, Fold, Folder, House, Notebook } from '@element-plus/icons-vue'
+import { Connection, DataAnalysis, Document, Expand, Fold, Folder, House, Notebook } from '@element-plus/icons-vue'
 import { useProjectStore } from '../stores/project'
 
 const route = useRoute()
@@ -105,6 +105,13 @@ const projectSubItems = computed(() => [
     disabledTitle: '先进入一个项目后可用',
     to: `/projects/${activeProjectId.value}/reports`,
     icon: Notebook
+  },
+  {
+    label: 'RAG',
+    title: '研究问答',
+    disabledTitle: '先进入一个项目后可用',
+    to: `/projects/${activeProjectId.value}/rag`,
+    icon: Connection
   }
 ])
 
@@ -113,6 +120,7 @@ const sectionLabel = computed(() => {
   if (route.path.includes('/papers')) return '论文'
   if (route.path.includes('/experiments')) return '实验'
   if (route.path.includes('/reports')) return '周报'
+  if (route.path.includes('/rag')) return 'RAG'
   return '项目'
 })
 

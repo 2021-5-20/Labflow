@@ -156,6 +156,10 @@ class BackendApiGapTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString());
+        jdbcTemplate.update(
+                "update papers set created_at = TIMESTAMP WITH TIME ZONE '2026-05-03 00:00:00Z', updated_at = TIMESTAMP WITH TIME ZONE '2026-05-03 00:00:00Z' where id = ?",
+                paperId
+        );
 
         String jobId = extractId(mockMvc.perform(post("/api/ai/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -189,6 +193,59 @@ class BackendApiGapTest {
                 .andExpect(jsonPath("$.contentMarkdown", containsString("局限性")))
                 .andExpect(jsonPath("$.contentMarkdown", not(containsString("AI 局限性"))))
                 .andExpect(jsonPath("$.contentMarkdown", containsString("模拟局限性")));
+    }
+
+    @Test
+    void ragIndexSearchAndAskUsesProjectPapersAndExperiments() throws Exception {
+        String projectId = createProject();
+        mockMvc.perform(post("/api/projects/{projectId}/papers", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title":"Graph Transformer for NIDS",
+                                  "authors":"Researcher A",
+                                  "tags":"nids,graph-transformer,anomaly-detection",
+                                  "keyClaims":"Graph transformer features improve network intrusion detection on temporal packet graphs.",
+                                  "notes":"Compare against CNN and classical anomaly baselines."
+                                }
+                                """))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/projects/{projectId}/experiments", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name":"NIDS graph transformer ablation",
+                                  "status":"RUNNING",
+                                  "dataset":"CICIDS2017",
+                                  "metrics":"f1=0.912",
+                                  "conclusion":"Edge-aware graph features improve recall for rare attacks.",
+                                  "nextStep":"Run larger temporal-window experiments."
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/projects/{projectId}/rag/index", projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.projectId").value(projectId))
+                .andExpect(jsonPath("$.chunkCount").value(2));
+
+        mockMvc.perform(post("/api/projects/{projectId}/rag/search", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"question":"graph transformer 在 NIDS 里面改善了什么？"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].sourceType").value("PAPER"))
+                .andExpect(jsonPath("$.results[0].contentText", containsString("Graph Transformer for NIDS")));
+
+        mockMvc.perform(post("/api/projects/{projectId}/rag/ask", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"question":"graph transformer 在 NIDS 里面改善了什么？"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.answerMarkdown", containsString("Graph Transformer for NIDS")))
+                .andExpect(jsonPath("$.contexts[0].sourceType").value("PAPER"));
     }
 
     @Test

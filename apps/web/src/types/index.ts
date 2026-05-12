@@ -108,6 +108,38 @@ export interface WeeklyReportDraft {
   contentMarkdown: string
 }
 
+export interface RagChunk {
+  id: string
+  projectId: string
+  sourceType: 'PAPER' | 'EXPERIMENT' | string
+  sourceId?: string
+  sourceTitle: string
+  contentText: string
+  score: number
+  metadataJson?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface RagIndexResult {
+  projectId: string
+  chunkCount: number
+  indexedAt: string
+}
+
+export interface RagSearchResult {
+  projectId: string
+  question: string
+  results: RagChunk[]
+}
+
+export interface RagAskResult {
+  projectId: string
+  question: string
+  answerMarkdown: string
+  contexts: RagChunk[]
+}
+
 export interface ProjectSummary {
   id: string
   name: string
